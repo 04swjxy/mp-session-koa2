@@ -1,0 +1,19 @@
+{
+  "name": "mp-session-koa2",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "04swjxy",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "koa-session2": "^2.2.6",
+    "lodash": "^4.17.10",
+  }
+}
