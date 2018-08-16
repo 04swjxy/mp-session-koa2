@@ -1,6 +1,5 @@
 const url = require('url');
 const crypto = require('crypto');
-// const pify = require('pify');
 const MemoryStore = require('koa-session2').Store;
 const _ = require('lodash');
 const login = require('./lib/login');
@@ -43,8 +42,6 @@ function sessionMp(options = {}) {
 
 
   return async function handle(ctx, next) {
-    // console.log('sessionHandle ctx.url', ctx.url);
-    // console.log('ctx.request', ctx.request);
     const getParam = (() => {
       const headers = {};
       const queries = {};
@@ -71,7 +68,6 @@ function sessionMp(options = {}) {
     ctx.session = {};
     if (id && skey) {
       try {
-        // const session = await pify(store.get.bind(store))(id, ctx);
         const session = await Promise.resolve(store.get(id, ctx)).catch((e) => {
           throw e;
         });
@@ -97,13 +93,14 @@ function sessionMp(options = {}) {
         };
         ctx.body = errObj;
       }
-
+      // 保存原始的session数据
       const oldSession = _.cloneDeep(ctx.session);
       await next();
 
       const newSession = ctx.session;
       if (_.isEqual(oldSession, newSession)) return;
 
+      //储存新的session数据
       if (!newSession || _.isEmpty(newSession)) {
         await Promise.resolve(store.destroy(id, ctx)).catch((e) => {
           throw e;
@@ -111,7 +108,6 @@ function sessionMp(options = {}) {
         ctx.cookies.set(constants.WX_HEADER_ID, null);
         return;
       }
-      // set/update session
       const ops = Object.assign({}, options, { sid: id });
       const sid = await Promise.resolve(store.set(ctx.session, ops, ctx));
       ctx.cookies.set(constants.WX_HEADER_ID, sid, options);
@@ -120,7 +116,6 @@ function sessionMp(options = {}) {
 
 
     if (isLoginPath) {
-      // console.log('isLoginPath:', isLoginPath);
       const requireHeader = (key) => {
         const header = getParam(key);
         if (!header) {
@@ -153,20 +148,15 @@ function sessionMp(options = {}) {
         ctx.session.sessionKey = sessionKey;
         ctx.session.openId = openId;
         ctx.session.userInfo = userInfo;
-        // ctx.session = session;
-        // session.cookie = new Cookie({ maxAge }); // fake cookie to support express-session Stores
       } catch (e) {
         ctx.throw(500, e);
       }
-      // save the session
       const maxAge = options.maxAge || 5 * 3600;
-      // await pify(store.set.bind(store))(session, { sid: ctx.session.id, maxAge })
       await Promise.resolve(store.set(ctx.session, { sid: ctx.session.id, maxAge }))
         .catch((e) => {
           ctx.throw(500, e);
         });
 
-      // console.log('ctx.session', ctx.session);
       ctx.body = {
         [constants.WX_SESSION_MAGIC_ID]: 1,
         session: {
