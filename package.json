@@ -1,7 +1,7 @@
 {
   "name": "mp-session-koa2",
-  "version": "0.1.0",
-  "description": "",
+  "version": "0.1.1",
+  "description": "node koa2 session middleware for wechat micro application",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -9,11 +9,34 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/04swjxy/mp-session-koa2"
+  },
+  "files":[
+    "index.js",
+    "libs"
+  ],
+  "keywords": [
+    "wechat micro application",
+    "koa2",
+    "session",
+    "redis",
+    "store",
+    "middleware"
+  ],
   "author": "04swjxy",
-  "license": "ISC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/04swjxy/mp-session-koa2/issues"
+  },
+  "homepage": "https://github.com/04swjxy/mp-session-koa2/blob/master/README.md",
   "dependencies": {
     "axios": "^0.18.0",
     "koa-session2": "^2.2.6",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.10"
+  },
+  "engines": {
+    "node": ">=7.6.0"
   }
 }
