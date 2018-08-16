@@ -9,7 +9,6 @@
 ## 获取和安装
 ```
 npm install mp-session-koa2
-
 ```
 
 ## Usage
