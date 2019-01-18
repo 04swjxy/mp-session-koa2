@@ -1,0 +1,17 @@
+{
+  "name": "test-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.5.2",
+    "koa-router": "^7.4.0",
+    "axios": "^0.18.0",
+    "lodash": "^4.17.10"
+  }
+}
