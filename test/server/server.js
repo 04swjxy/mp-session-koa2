@@ -1,13 +1,12 @@
 // 启动httpService
 const Koa = require('koa');
-const _ = require('lodash');
-const { sessionMp, redisStore } = require('../../index');
+const { sessionMp, RedisStore } = require('../../index');
 const router = require('./router');
 const config = require('./config');
 
 const option = Object.assign({
   grant_type: 'authorization_code',
-  store: new redisStore(),
+  store: new RedisStore(),
 }, config.sessionOption);
 
 
@@ -27,10 +26,10 @@ app.use(async (ctx, next) => {
 
 app.use(sessionMp(option));
 
-app.use(router.routes())
+app.use(router.routes());
 app.use(router.allowedMethods());
 
-//http服务
+// http服务
 app.listen(config.port, () => {
   console.log(`appService is listening at ${config.port}`);
 });

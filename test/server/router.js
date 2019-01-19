@@ -2,19 +2,21 @@ const Router = require('koa-router');
 const router = new Router();
 
 router.use((ctx, next) => {
-  // console.log(ctx.session);
   if(ctx.session.userInfo){
+    if (!ctx.session.userInfo.userId) {
+      // 可以添加添加自定义数据 到session中
+      // 该用户下一次访问时, session中将带有自定义的数据
+      ctx.session.userInfo.userId = 'testId12345'
+    }
     next();
   } else {
-    // console.log('ctx.session is', ctx.session);
     ctx.throw(401,'未登录');
   }
 })
 
 router.get('/api/testData', (ctx, next) => {
-    // 在session中添加 自定义参数
-    // ctx.session.userInfo.userId = 'userIdTest123';
-    ctx.body = { testData: '这是从服务器获取的测试数据 '};
+  // console.log(ctx.session);
+  ctx.body = { testData: '这是从服务器获取的测试数据 '};
 });
 
 

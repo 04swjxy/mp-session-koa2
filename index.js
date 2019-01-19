@@ -1,12 +1,11 @@
 const url = require('url');
 const crypto = require('crypto');
 const _ = require('lodash');
-// const MemoryStore = require('koa-session2').Store;
 const MemoryStore = require('./lib/memoryStore');
+const RedisStore = require('./lib/redisStore');
 const login = require('./lib/login');
 const constants = require('./lib/constants');
 const WXBizDataCrypt = require('./lib/WXBizDataCrypt');
-const redisStore = require('./lib/redisStore');
 
 
 function sha1(message) {
@@ -35,10 +34,9 @@ function sessionMp(options = {}) {
   const loginPath = requireOption('loginPath');
 
   const store = options.store || new MemoryStore();
-  if (store) {
-    if (typeof store.set !== 'function' || typeof store.get !== 'function') {
-      throw new Error('session-mp-koa2 初始化失败：不是合法的 store');
-    }
+  console.log('store', store);
+  if (typeof store.set !== 'function' || typeof store.get !== 'function') {
+    throw new Error('session-mp-koa2 初始化失败：不是合法的 store');
   }
   const maxAge = options.maxAge || 5 * 3600;
 
@@ -67,15 +65,11 @@ function sessionMp(options = {}) {
     const skey = getParam(constants.WX_HEADER_SKEY);
 
     ctx.session = {};
-    console.log('id', id);
-    console.log('skey', skey);
     if (id && skey) {
       try {
         const session = await Promise.resolve(store.get(id)).catch((e) => {
           throw e;
         });
-        console.log(session);
-        // console.log('after');
         if (!session) {
           throw new Error('会话过期');
         }
@@ -101,14 +95,11 @@ function sessionMp(options = {}) {
       }
       // 保存原始的session数据
       const oldSession = _.cloneDeep(ctx.session);
-      // console.log('oldSession', oldSession);
       await next();
 
       const newSession = ctx.session;
-      // console.log('newSession', newSession);
       if (_.isEqual(oldSession, newSession)) return;
 
-      console.log('session change');
       // 储存新的session数据
       if (!newSession || _.isEmpty(newSession)) {
         await Promise.resolve(store.destroy(id)).catch((e) => {
@@ -117,10 +108,7 @@ function sessionMp(options = {}) {
         ctx.cookies.set(constants.WX_HEADER_ID, null);
         return;
       }
-      // const ops = Object.assign({}, options, { sid: id });
-      // const ops = { sid: id, maxAge };
       await Promise.resolve(store.set(newSession, { sid: id, maxAge }));
-      // ctx.cookies.set(constants.WX_HEADER_ID, sid, options);
       return;
     }
 
@@ -158,11 +146,10 @@ function sessionMp(options = {}) {
       } catch (e) {
         ctx.throw(500, e);
       }
-      await Promise.resolve(store.set(ctx.session, { sid: id, maxAge }))
+      await Promise.resolve(store.set(ctx.session, { sid: ctx.session.id, maxAge }))
         .catch((e) => {
           ctx.throw(500, e);
         });
-
       ctx.body = {
         [constants.WX_SESSION_MAGIC_ID]: 1,
         session: {
@@ -178,4 +165,4 @@ function sessionMp(options = {}) {
 }
 
 
-module.exports = { sessionMp, redisStore };
+module.exports = { sessionMp, RedisStore };
