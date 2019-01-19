@@ -1,17 +1,18 @@
 //app.js
+const qcloud = require('./bower_components/wafer-client-sdk/index.js');
+const config = require('./config');
+qcloud.setLoginUrl(config.loginUrl);
+
+
 App({
   onLaunch: function () {
-    // 展示本地存储能力
-    var logs = wx.getStorageSync('logs') || []
-    logs.unshift(Date.now())
-    wx.setStorageSync('logs', logs)
 
     // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      }
-    })
+    // wx.login({
+    //   success: res => {
+    //     // 发送 res.code 到后台换取 openId, sessionKey, unionId
+    //   }
+    // })
     // 获取用户信息
     wx.getSetting({
       success: res => {
@@ -33,6 +34,8 @@ App({
       }
     })
   },
+  config,
+  $qcloud: qcloud,
   globalData: {
     userInfo: null
   }

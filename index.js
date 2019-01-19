@@ -1,7 +1,8 @@
 const url = require('url');
 const crypto = require('crypto');
-const MemoryStore = require('koa-session2').Store;
 const _ = require('lodash');
+// const MemoryStore = require('koa-session2').Store;
+const MemoryStore = require('./lib/memoryStore');
 const login = require('./lib/login');
 const constants = require('./lib/constants');
 const WXBizDataCrypt = require('./lib/WXBizDataCrypt');
@@ -39,7 +40,7 @@ function sessionMp(options = {}) {
       throw new Error('session-mp-koa2 初始化失败：不是合法的 store');
     }
   }
-
+  const maxAge = options.maxAge || 5 * 3600;
 
   return async function handle(ctx, next) {
     const getParam = (() => {
@@ -66,11 +67,15 @@ function sessionMp(options = {}) {
     const skey = getParam(constants.WX_HEADER_SKEY);
 
     ctx.session = {};
+    console.log('id', id);
+    console.log('skey', skey);
     if (id && skey) {
       try {
-        const session = await Promise.resolve(store.get(id, ctx)).catch((e) => {
+        const session = await Promise.resolve(store.get(id)).catch((e) => {
           throw e;
         });
+        console.log(session);
+        // console.log('after');
         if (!session) {
           throw new Error('会话过期');
         }
@@ -92,25 +97,30 @@ function sessionMp(options = {}) {
           message: `会话已失效，请重新登录：${err ? err.message : '未知错误'}`,
         };
         ctx.body = errObj;
+        return;
       }
       // 保存原始的session数据
       const oldSession = _.cloneDeep(ctx.session);
+      // console.log('oldSession', oldSession);
       await next();
 
       const newSession = ctx.session;
+      // console.log('newSession', newSession);
       if (_.isEqual(oldSession, newSession)) return;
 
-      //储存新的session数据
+      console.log('session change');
+      // 储存新的session数据
       if (!newSession || _.isEmpty(newSession)) {
-        await Promise.resolve(store.destroy(id, ctx)).catch((e) => {
+        await Promise.resolve(store.destroy(id)).catch((e) => {
           throw e;
         });
         ctx.cookies.set(constants.WX_HEADER_ID, null);
         return;
       }
-      const ops = Object.assign({}, options, { sid: id });
-      const sid = await Promise.resolve(store.set(ctx.session, ops, ctx));
-      ctx.cookies.set(constants.WX_HEADER_ID, sid, options);
+      // const ops = Object.assign({}, options, { sid: id });
+      // const ops = { sid: id, maxAge };
+      await Promise.resolve(store.set(newSession, { sid: id, maxAge }));
+      // ctx.cookies.set(constants.WX_HEADER_ID, sid, options);
       return;
     }
 
@@ -136,23 +146,19 @@ function sessionMp(options = {}) {
         return;
       }
 
-      // const session = {};
       try {
-        const { sessionKey, openId } = await login({ appId, appSecret, code });
-
+        const { sessionKey } = await login({ appId, appSecret, code });
         const wxBiz = new WXBizDataCrypt(appId, sessionKey);
         const userInfo = wxBiz.decryptData(encryptData, iv);
 
         ctx.session.id = crypto.randomBytes(32).toString('hex');
         ctx.session.skey = generateSkey(sessionKey);
         ctx.session.sessionKey = sessionKey;
-        ctx.session.openId = openId;
         ctx.session.userInfo = userInfo;
       } catch (e) {
         ctx.throw(500, e);
       }
-      const maxAge = options.maxAge || 5 * 3600;
-      await Promise.resolve(store.set(ctx.session, { sid: ctx.session.id, maxAge }))
+      await Promise.resolve(store.set(ctx.session, { sid: id, maxAge }))
         .catch((e) => {
           ctx.throw(500, e);
         });
@@ -172,4 +178,4 @@ function sessionMp(options = {}) {
 }
 
 
-module.exports = {sessionMp , redisStore};
+module.exports = { sessionMp, redisStore };

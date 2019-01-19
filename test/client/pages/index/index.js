@@ -7,13 +7,9 @@ Page({
     motto: 'Hello World',
     userInfo: {},
     hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo')
-  },
-  //事件处理函数
-  bindViewTap: function() {
-    wx.navigateTo({
-      url: '../logs/logs'
-    })
+    canIUse: wx.canIUse('button.open-type.getUserInfo'),
+    isLogin: false,
+    testData: '',
   },
   onLoad: function () {
     if (app.globalData.userInfo) {
@@ -44,7 +40,6 @@ Page({
     }
   },
   getUserInfo: function(e) {
-    console.log(e)
     app.globalData.userInfo = e.detail.userInfo
     this.setData({
       userInfo: e.detail.userInfo,
@@ -53,6 +48,56 @@ Page({
   },
   // 登录
   login(){
-
+    const that = this;
+    app.$qcloud.login({
+      success(res){
+        console.log(res);
+        that.setData({ isLogin: true });
+      },
+      fail(err){
+        console.error(err);
+      },
+    })
+  },
+  // 获取服务器数据
+  getSomeData(){
+    const that = this;
+    app.$qcloud.request({
+      url: app.config.apiUrl + '/testData',
+      success(res){
+        if (res.statusCode >= 400) {
+          wx.showModal({
+            title: '发生错误',
+            content: `statusCode:${res.statusCode}`,
+            showCancel: false,
+            confirmColor: '#f44',
+          })
+          return;
+        };
+        const { error, testData } = res.data;
+        if (error) {
+          wx.showModal({
+            title: '失败',
+            content: error,
+            showCancel: false,
+            confirmColor: '#f44',
+          })
+          return;
+        }
+        wx.showToast({
+          title: '成功',
+          duration: 800,
+        })
+        that.setData({ testData });
+      },
+      fail(err){
+        wx.showModal({
+          title: '发生错误',
+          content: err,
+          showCancel: false,
+          confirmColor: '#f44',
+        })
+      },
+    })
   },
 })

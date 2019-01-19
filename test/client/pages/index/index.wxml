@@ -1,14 +1,24 @@
 <!--index.wxml-->
 <view class="container">
   <view class="userinfo">
-    <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
+    <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 同意授权 </button>
     <block wx:else>
-      <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+      <image class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
       <text class="userinfo-nickname">{{userInfo.nickName}}</text>
     </block>
   </view>
-  <view class="usermotto">
-    <button bindLogin="login"> 登录测试 </button>
-    <!-- <text class="user-motto">{{motto}}</text> -->
-  </view>
+
+  <block wx:if="{{hasUserInfo}}">
+    <view class="usermotto">
+      <view wx:if="{{isLogin}}">登录成功</view>
+      <button bindtap="login" wx:else> 登录测试 </button>
+    </view>
+
+    <view wx:if="{{isLogin}}">
+      <view class="usermotto">
+        <button bindtap="getSomeData"> 获取服务器测试数据 </button>
+      </view>
+      <view>{{testData}}</view>
+    </view>
+  </block>
 </view>

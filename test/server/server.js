@@ -1,25 +1,13 @@
 // 启动httpService
 const Koa = require('koa');
-const Router = require('koa-router');
-// const axios = require('axios');
 const _ = require('lodash');
+const { sessionMp, redisStore } = require('../../index');
+const router = require('./router');
 const config = require('./config');
-
-const { sessionMp } = require('../../index');
-
-const router = new Router();
-router.get('/api/userInfo', (ctx, next) => {
-  if(ctx.session){
-    // do somethings
-    ctx.body = ctx.session.userInfo;
-    return;
-  } else {
-    ctx.throw(401,'未登录');
-  }
-});
 
 const option = Object.assign({
   grant_type: 'authorization_code',
+  store: new redisStore(),
 }, config.sessionOption);
 
 
