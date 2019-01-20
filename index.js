@@ -34,7 +34,6 @@ function sessionMp(options = {}) {
   const loginPath = requireOption('loginPath');
 
   const store = options.store || new MemoryStore();
-  console.log('store', store);
   if (typeof store.set !== 'function' || typeof store.get !== 'function') {
     throw new Error('session-mp-koa2 初始化失败：不是合法的 store');
   }

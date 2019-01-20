@@ -1,13 +1,9 @@
 // 启动httpService
 const Koa = require('koa');
-const { sessionMp, RedisStore } = require('../../index');
+const { sessionMp } = require('../../index');
 const router = require('./router');
 const config = require('./config');
 
-const option = Object.assign({
-  grant_type: 'authorization_code',
-  store: new RedisStore(),
-}, config.sessionOption);
 
 
 const app = new Koa();
@@ -24,7 +20,7 @@ app.use(async (ctx, next) => {
   }
 });
 
-app.use(sessionMp(option));
+app.use(sessionMp(config.sessionOption));
 
 app.use(router.routes());
 app.use(router.allowedMethods());

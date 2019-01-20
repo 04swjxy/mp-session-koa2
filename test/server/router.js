@@ -15,7 +15,7 @@ router.use((ctx, next) => {
 })
 
 router.get('/api/testData', (ctx, next) => {
-  // console.log(ctx.session);
+  console.log(ctx.session.userInfo);
   ctx.body = { testData: '这是从服务器获取的测试数据 '};
 });
 

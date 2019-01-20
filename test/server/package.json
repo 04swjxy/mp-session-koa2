@@ -10,8 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "koa": "^2.5.2",
-    "koa-router": "^7.4.0",
-    "axios": "^0.18.0",
-    "lodash": "^4.17.10"
+    "koa-router": "^7.4.0"
   }
 }
