@@ -15,7 +15,7 @@ npm install mp-session-koa2
 用法与官方wafer-node-session模块基本一致.
 ```javaScript
 const Koa = require('koa');
-const sessionMp = require('mp-session-koa2');
+const { sessionMp } = require('mp-session-koa2');
 
 const option = {
   appId: '', // 小程序 appId, 必填

@@ -1,5 +1,5 @@
 
-const { RedisStore } = require('../../index');
+const { redisStore } = require('../../index');
 
 const config = {
   port: 8080,
@@ -9,7 +9,7 @@ const config = {
     loginPath: '/api/login',
     grant_type: 'authorization_code',
     maxAge: 3600,  //session 自动过期时间,单位:秒
-    // store: new RedisStore({
+    // store: new redisStore({
     //   password: '000000',
     // }),
   },

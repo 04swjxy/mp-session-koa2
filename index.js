@@ -2,7 +2,7 @@ const url = require('url');
 const crypto = require('crypto');
 const _ = require('lodash');
 const MemoryStore = require('./lib/memoryStore');
-const RedisStore = require('./lib/redisStore');
+const redisStore = require('./lib/redisStore');
 const login = require('./lib/login');
 const constants = require('./lib/constants');
 const WXBizDataCrypt = require('./lib/WXBizDataCrypt');
@@ -164,4 +164,4 @@ function sessionMp(options = {}) {
 }
 
 
-module.exports = { sessionMp, RedisStore };
+module.exports = { sessionMp, redisStore };

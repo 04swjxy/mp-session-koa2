@@ -1,6 +1,6 @@
 {
   "name": "mp-session-koa2",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "node koa2 session middleware for wechat micro application",
   "main": "index.js",
   "directories": {
