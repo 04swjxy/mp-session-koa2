@@ -23,7 +23,8 @@ const option = {
   grant_type: 'authorization_code',
   loginPath: '/api/login', // 登录地址, 可以自定义自己的登录路径
   maxAge: 1 * 3600,  //自动过期时间, 单位秒
-  store: null, //选填, 如果为空值, 默认储存在内存中, 数据过多有内存不足的风险.
+  coverTime: 300, //v0.2.0以上,用户发起任何请求时,session有效时间<=coverTime时, 重新设置maxAge
+  store: null, //选填, 如果为空值, 默认储存在内存中. 推荐使用redis
 };
 
 const app = new Koa();
@@ -71,6 +72,7 @@ const option = {
   grant_type: 'authorization_code',
   loginPath: '/api/login', // 登录地址, 可以自定义自己的登录路径
   maxAge: 1 * 3600,  //自动过期时间, 单位秒
+  coverTime: 5 * 60, //当本次请求session剩余时间<=coverTime时, 重新设置session有效时间为maxAge
   store: new redisStore({
     port: 6379,          // Redis port
     host: '127.0.0.1',   // Redis host
@@ -90,9 +92,10 @@ store同时也支持其他兼容koa-session2模块的store.例如[koa-session2-m
 
 
 ## 测试模型
-test目录中有一个简易的测试模型.
+example目录中有一个简易的测试模型.
 
-客户端: 用小程序开发工具打开test/client目录.在工具中将appId修改为自己的值.
+客户端: 用小程序开发工具打开example/client目录.在工具中将appId修改为自己的值.
 
-服务器端: 进入到test/server 目录后, npm install 安装依赖模块后, npm run dev, 启动服务器.
-test/server/config 是服务器的配置参数. 其中appId和appSecret必须填写自己的值.
+服务器端: example/server/config 是服务器的配置参数. 其中appId和appSecret必须填写自己的值.
+进入到example/server 目录后, npm install 安装依赖模块后, npm run dev, 启动服务器.
+

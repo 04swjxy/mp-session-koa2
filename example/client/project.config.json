@@ -12,13 +12,15 @@
 		"autoAudits": false
 	},
 	"compileType": "miniprogram",
-	"libVersion": "1.9.91",
-	"appid": "wxf1dc939a9ea2b673",
+	"libVersion": "2.4.4",
+	"appid": "",
 	"projectname": "%2Fhome%2Fjxy%2Fstuff%2Fmp-session-koa2%2Ftest%2Fclient",
 	"debugOptions": {
 		"hidedInDevtools": []
 	},
 	"isGameTourist": false,
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
 	"condition": {
 		"search": {
 			"current": -1,

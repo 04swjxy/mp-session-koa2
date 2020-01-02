@@ -15,7 +15,9 @@ router.use((ctx, next) => {
 })
 
 router.get('/api/testData', (ctx, next) => {
-  console.log(ctx.session.userInfo);
+  // session 剩余有效时间
+  console.log('ctx.sessionRemainTime', ctx.sessionRemainTime);
+  // 返回数据
   ctx.body = { testData: '这是从服务器获取的测试数据 '};
 });
 

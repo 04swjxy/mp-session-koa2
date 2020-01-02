@@ -1,5 +1,5 @@
 //app.js
-const qcloud = require('./bower_components/wafer-client-sdk/index.js');
+const qcloud = require('./bower_components/wafer-client-sdk/index');
 const config = require('./config');
 qcloud.setLoginUrl(config.loginUrl);
 

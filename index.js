@@ -18,7 +18,8 @@ function sha1(message) {
  * @param {string} [options.appId] 小程序 appId
  * @param {string} [options.appSecret] 小程序 appSecret
  * @param {string} [options.loginPath] 小程序会话登录路径
- * @param {string} [options.maxAge] 会话有效期
+ * @param {number} [options.maxAge] 会话有效期
+ * @param {number} [options.coverTime] 延长回话有效期的时间
  * @param {Object} [options.store=MemoryStore] 会话使用的 Store
  */
 
@@ -38,7 +39,8 @@ function sessionMp(options = {}) {
     throw new Error('session-mp-koa2 初始化失败：不是合法的 store');
   }
   const maxAge = options.maxAge || 5 * 3600;
-
+  const coverTime = options.coverTime || 0;
+  
   return async function handle(ctx, next) {
     const getParam = (() => {
       const headers = {};
@@ -66,9 +68,9 @@ function sessionMp(options = {}) {
     ctx.session = {};
     if (id && skey) {
       try {
-        const session = await Promise.resolve(store.get(id)).catch((e) => {
-          throw e;
-        });
+        const sessionPms = store.get(id);
+        const remainTimePms = store.ttl(id);
+        const [session, remainTime] = await Promise.all([sessionPms, remainTimePms]);
         if (!session) {
           throw new Error('会话过期');
         }
@@ -78,6 +80,7 @@ function sessionMp(options = {}) {
         }
         ctx.session = session;
         ctx.session.id = id;
+        ctx.sessionRemainTime = remainTime;
 
         if (isLoginPath) {
           ctx.body = { code: 0, message: '小程序会话已登录' };
@@ -97,17 +100,24 @@ function sessionMp(options = {}) {
       await next();
 
       const newSession = ctx.session;
-      if (_.isEqual(oldSession, newSession)) return;
-
-      // 储存新的session数据
+      // 更新session
       if (!newSession || _.isEmpty(newSession)) {
-        await Promise.resolve(store.destroy(id)).catch((e) => {
+        // 删除session
+        await store.destroy(id).catch((e) => {
           throw e;
         });
         ctx.cookies.set(constants.WX_HEADER_ID, null);
         return;
       }
-      await Promise.resolve(store.set(newSession, { sid: id, maxAge }));
+      // 有效时间小于coverTime, 重新设置maxAge
+      if (coverTime > 0 && ctx.sessionRemainTime <= coverTime) {
+        await store.set(newSession, { sid: id, maxAge });
+      }
+      // 不相等,覆盖
+      if (!_.isEqual(oldSession, newSession)) {
+        await store.set(newSession, { sid: id, maxAge });
+      }
+
       return;
     }
 
