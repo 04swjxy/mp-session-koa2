@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "js-yaml": "^3.13.1",
     "koa": "^2.5.2",
     "koa-router": "^7.4.0"
   }
