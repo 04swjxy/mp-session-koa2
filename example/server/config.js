@@ -20,6 +20,7 @@ const config = {
     grant_type: 'authorization_code',
     maxAge: 15 * 60, // session 自动过期时间,单位:秒
     coverTime: 5 * 60, // 用户发起任何请求时,session有效时间<=coverTime时, 重新设置maxAge
+    loginNext: true,
     store: new RedisStore({
       port: 6379, // Redis port
       host: '127.0.0.1', // Redis host

@@ -23,7 +23,8 @@ const option = {
   grant_type: 'authorization_code',
   loginPath: '/api/login', // 登录地址, 可以自定义自己的登录路径
   maxAge: 1 * 3600,  //自动过期时间, 单位秒
-  coverTime: 300, //v0.2.0以上,用户发起任何请求时,session有效时间<=coverTime时, 重新设置maxAge
+  coverTime: 300, //sincev0.2.0,用户发起任何请求时,session有效时间<=coverTime时, 重新设置maxAge
+  loginNext: false, //sincev0.3.0,是否允许登录成功后, 传递给下一步.默认为否.一般用于用户信息初始化,和向ctx.session中添加信息.下一步处理函数中不可以使用ctx.body发送数据, 否则导致报错, 登录不成功
   store: null, //选填, 如果为空值, 默认储存在内存中. 推荐使用redis
 };
 
@@ -73,6 +74,7 @@ const option = {
   loginPath: '/api/login', // 登录地址, 可以自定义自己的登录路径
   maxAge: 1 * 3600,  //自动过期时间, 单位秒
   coverTime: 5 * 60, //当本次请求session剩余时间<=coverTime时, 重新设置session有效时间为maxAge
+  loginNext: false, //是否允许登录成功后, 传递给下一步.默认为否.一般用于用户信息初始化,和向ctx.session中添加信息.下一步处理函数中不可以使用ctx.body发送数据, 否则导致报错, 登录不成功
   store: new redisStore({
     port: 6379,          // Redis port
     host: '127.0.0.1',   // Redis host

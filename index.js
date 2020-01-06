@@ -34,13 +34,34 @@ function sessionMp(options = {}) {
   const appSecret = requireOption('appSecret');
   const loginPath = requireOption('loginPath');
 
+  const debug = !!options.debug;
   const store = options.store || new MemoryStore();
   if (typeof store.set !== 'function' || typeof store.get !== 'function') {
     throw new Error('session-mp-koa2 初始化失败：不是合法的 store');
   }
-  const maxAge = options.maxAge || 5 * 3600;
+  const maxAge = options.maxAge || 3600;
+  // sice v0.2.0
+  // 用户连续操作室,是否自动延长 session 有效时间
   const coverTime = options.coverTime || 0;
-  
+  // since v0.3.0
+  // 是否允许登录成功后, 传递给下一步.默认为否
+  // 一般用于用户信息初始化,和向ctx.session中添加信息
+  // 下一步处理函数中不可以使用ctx.body发送数据, 否则导致报错, 登录不成功
+  const loginNext = !!options.loginNext;
+  if (debug) {
+    console.log('options of sessionMp:', {
+      debug,
+      appId,
+      appSecret,
+      loginPath,
+      store,
+      maxAge,
+      coverTime,
+      loginNext,
+    });
+  }
+
+
   return async function handle(ctx, next) {
     const getParam = (() => {
       const headers = {};
@@ -152,13 +173,17 @@ function sessionMp(options = {}) {
         ctx.session.skey = generateSkey(sessionKey);
         ctx.session.sessionKey = sessionKey;
         ctx.session.userInfo = userInfo;
+
+        if (loginNext) {
+          await next();
+          await store.set(ctx.session, { sid: ctx.session.id, maxAge });
+        } else {
+          await store.set(ctx.session, { sid: ctx.session.id, maxAge });
+        }
       } catch (e) {
         ctx.throw(500, e);
       }
-      await Promise.resolve(store.set(ctx.session, { sid: ctx.session.id, maxAge }))
-        .catch((e) => {
-          ctx.throw(500, e);
-        });
+
       ctx.body = {
         [constants.WX_SESSION_MAGIC_ID]: 1,
         session: {
