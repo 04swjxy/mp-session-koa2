@@ -15,11 +15,13 @@ function sha1(message) {
 /**
  * 创建小程序会话中间件
  * @param {Object} [options]
- * @param {string} [options.appId] 小程序 appId
- * @param {string} [options.appSecret] 小程序 appSecret
- * @param {string} [options.loginPath] 小程序会话登录路径
- * @param {number} [options.maxAge] 会话有效期
- * @param {number} [options.coverTime] 延长回话有效期的时间
+ * @param {String} [options.appId] 小程序 appId
+ * @param {String} [options.appSecret] 小程序 appSecret
+ * @param {String} [options.loginPath] 小程序会话登录路径
+ * @param {Number} [options.maxAge] 会话有效期
+ * @param {Number} [options.coverTime] 延长回话有效期的时间
+ * @param {Boolean} [options.compareByJSON=false] sice0.4.0,是否用JSON.stringify(session)比较
+ * @param {Boolean} [options.debug=false] 打印debug信息
  * @param {Object} [options.store=MemoryStore] 会话使用的 Store
  */
 
@@ -40,14 +42,21 @@ function sessionMp(options = {}) {
     throw new Error('session-mp-koa2 初始化失败：不是合法的 store');
   }
   const maxAge = options.maxAge || 3600;
+
   // sice v0.2.0
   // 用户连续操作室,是否自动延长 session 有效时间
   const coverTime = options.coverTime || 0;
+
   // since v0.3.0
   // 是否允许登录成功后, 传递给下一步.默认为否
   // 一般用于用户信息初始化,和向ctx.session中添加信息
   // 下一步处理函数中不可以使用ctx.body发送数据, 否则导致报错, 登录不成功
   const loginNext = !!options.loginNext;
+
+  // sice0.4.0,是否用JSON.stringify(session)比较
+  // 当默认方法报错时, 可以尝试该方法
+  const compareByJSON = !!options.compareByJSON;
+
   if (debug) {
     console.log('options of sessionMp:', {
       debug,
@@ -58,9 +67,9 @@ function sessionMp(options = {}) {
       maxAge,
       coverTime,
       loginNext,
+      compareByJSON,
     });
   }
-
 
   return async function handle(ctx, next) {
     const getParam = (() => {
@@ -117,7 +126,13 @@ function sessionMp(options = {}) {
         return;
       }
       // 保存原始的session数据
-      const oldSession = _.cloneDeep(ctx.session);
+      let oldSession = null;
+      if (compareByJSON) {
+        oldSession = JSON.stringify(ctx.session);
+      } else {
+        oldSession = _.cloneDeep(ctx.session);
+      }
+
       await next();
 
       const newSession = ctx.session;
@@ -135,7 +150,13 @@ function sessionMp(options = {}) {
         await store.set(newSession, { sid: id, maxAge });
       }
       // 不相等,覆盖
-      if (!_.isEqual(oldSession, newSession)) {
+      let equal = false;
+      if (compareByJSON) {
+        equal = oldSession === JSON.stringify(newSession);
+      } else {
+        equal = _.isEqual(oldSession, newSession);
+      }
+      if (!equal) {
         await store.set(newSession, { sid: id, maxAge });
       }
 
@@ -174,12 +195,8 @@ function sessionMp(options = {}) {
         ctx.session.sessionKey = sessionKey;
         ctx.session.userInfo = userInfo;
 
-        if (loginNext) {
-          await next();
-          await store.set(ctx.session, { sid: ctx.session.id, maxAge });
-        } else {
-          await store.set(ctx.session, { sid: ctx.session.id, maxAge });
-        }
+        if (loginNext) await next();
+        await store.set(ctx.session, { sid: ctx.session.id, maxAge });
       } catch (e) {
         ctx.throw(500, e);
       }

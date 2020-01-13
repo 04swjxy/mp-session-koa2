@@ -23,10 +23,14 @@ const option = {
   grant_type: 'authorization_code',
   loginPath: '/api/login', // 登录地址, 可以自定义自己的登录路径
   maxAge: 1 * 3600,  //自动过期时间, 单位秒
-  coverTime: 300, //sincev0.2.0,用户发起任何请求时,session有效时间<=coverTime时, 重新设置maxAge
-  loginNext: false, //sincev0.3.0,是否允许登录成功后, 传递给下一步.默认为否.一般用于用户信息初始化,和向ctx.session中添加信息.下一步处理函数中不可以使用ctx.body发送数据, 否则导致报错, 登录不成功
+  coverTime: 300, //since v0.2.0,用户发起任何请求时,session有效时间<=coverTime时, 重新设置maxAge
+  loginNext: false, //since v0.3.0,是否允许登录成功后, 传递给下一步.默认为否.一般用于用户信息初始化,和向ctx.session中添加信息.下一步处理函数中不可以使用ctx.body发送数据, 否则导致报错, 登录不成功
+  compareByJSON: false, //since v0.4.0 默认为false.是否用JSON.stringify(session)复制session,进行比较
+  debug: false, //打印debug信息
   store: null, //选填, 如果为空值, 默认储存在内存中. 推荐使用redis
 };
+// 有时session比较复杂,导致用_.cloneDeep报错.可以尝试设置compareByJSON:true.
+// 比如在Egg.js中使用,就会报错.可以设置为compareByJSON:true
 
 const app = new Koa();
 
