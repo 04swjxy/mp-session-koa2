@@ -33,7 +33,7 @@
   "homepage": "https://github.com/04swjxy/mp-session-koa2/blob/master/README.md",
   "dependencies": {
     "axios": "^0.18.0",
-    "ioredis": "^3.2.2",
+    "ioredis": "^4.14.1",
     "lodash": "^4.17.10"
   },
   "engines": {

@@ -2,3 +2,4 @@ node_modules/*
 
 example/server/node_modules/*
 example/appconf.yaml*
+example/appconf.yml*

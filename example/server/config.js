@@ -3,13 +3,16 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const { redisStore: RedisStore } = require('../../index');
 
-let weappConf = null;
+let weappConf = {};
 try {
-  weappConf = yaml.safeLoad(fs.readFileSync('../appconf.yaml', 'utf8'));
+  weappConf = yaml.safeLoad(fs.readFileSync('../appconf.yml', 'utf8'));
 } catch (e) {
-  throw new Error(e);
+  console.warn('../appconf.yml is not exist');
 }
+
 const { app_id: appId, app_secret: appSecret } = weappConf;
+
+const redis = weappConf.redis || {};
 
 const config = {
   port: 8080,
@@ -22,10 +25,11 @@ const config = {
     coverTime: 5 * 60, // 用户发起任何请求时,session有效时间<=coverTime时, 重新设置maxAge
     loginNext: true,
     store: new RedisStore({
-      port: 6379, // Redis port
-      host: '127.0.0.1', // Redis host
-      // family: 4,           // 4 (IPv4) or 6 (IPv6)
-      // password: 'auth',
+      port: redis.port || 6379, // Redis port
+      host: redis.host || '127.0.0.1', // Redis host
+      family: redis.password || 4,     // 4 (IPv4) or 6 (IPv6)
+      password: redis.password || '',
+      db: redis.db || 0
     }),
   },
 };
